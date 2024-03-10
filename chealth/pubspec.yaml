@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  health: ^6.0.0
+  health: ^8.1.0
   permission_handler: ^6.0.0
 
 dev_dependencies:

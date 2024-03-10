@@ -1,42 +1,37 @@
+import 'package:chealth/src/util.dart';
 import 'package:health/health.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomeController {
-  
-  Future<void> getData() async {
-    // create a HealthFactory for use in the app, choose if HealthConnect should be used or not
-   final HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
+  List<HealthDataPoint> _healthDataList = [];
+  final types = dataTypesAndroid;
 
-  // define the types to get
-  var types = [
-    HealthDataType.STEPS,
-    HealthDataType.BLOOD_GLUCOSE,
-  ];
+  Future authorize() async {
+    final permissions = types.map((e) => HealthDataAccess.READ_WRITE).toList();
+    HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
 
-  // requesting access to the data types before reading them
-  bool requested = await health.requestAuthorization(types);
+    // Request access to the required data types
+    await Permission.activityRecognition.request();
+    await Permission.location.request();
 
-  var now = DateTime.now();
+    // Check if we have health permissions
+    bool? hasPermissions =
+        await health.hasPermissions(types, permissions: permissions);
 
-  // fetch health data from the last 24 hours
-  List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-     now.subtract(const Duration(days: 3)), now, types);
 
-  // request permissions to write steps and blood glucose
-  types = [HealthDataType.STEPS, HealthDataType.BLOOD_GLUCOSE];
-  var permissions = [
-      HealthDataAccess.READ_WRITE,
-      HealthDataAccess.READ_WRITE
-  ];
- // await health.requestAuthorization(types, permissions: permissions);
+    hasPermissions = false;
 
-  // write steps and blood glucose
-  //bool success = await health.writeHealthData(10, HealthDataType.STEPS, now, now);
-  //success = await health.writeHealthData(3.1, HealthDataType.BLOOD_GLUCOSE, now, now);
+    bool authorized = false;
+    if (!hasPermissions) {
+      // requesting access to the data types before reading them
+      try {
+        authorized =
+            await health.requestAuthorization(types, permissions: permissions);
+      } catch (error) {
+        print("Exception in authorize: $error");
+      }
+    }
 
-  // get the number of steps for today
-  var midnight = DateTime(now.year, now.month, now.day);
-  print(healthData);
-
+    print('authorized: $authorized');
   }
-
 }

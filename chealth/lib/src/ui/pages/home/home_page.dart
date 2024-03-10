@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(title: const Text('Home Page')),
       floatingActionButton: FloatingActionButton(
           onPressed: () {
-            controller.getData();
+            controller.authorize();
           },
           child:const Icon(Icons.refresh),),
       body: const Center(
