@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "896548219712",
+    "project_id": "chealth-d9f16",
+    "storage_bucket": "chealth-d9f16.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:896548219712:android:22c6a680df03afa9aea8a5",
+        "android_client_info": {
+          "package_name": "com.chealth"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "896548219712-vk63lb9g54tpufqcv6nbvpcrnerco964.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chealth",
+            "certificate_hash": "8d87aa6bae216b1edb91bb776eb7051f88b974f3"
+          }
+        },
+        {
+          "client_id": "896548219712-njsfs80tk6m8ann1sk51jdpj35d1aqds.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGaIkUfuf5v0qQlYzpSgFaxwdNKpAVUWA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "896548219712-njsfs80tk6m8ann1sk51jdpj35d1aqds.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
