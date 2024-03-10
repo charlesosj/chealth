@@ -19,7 +19,7 @@ class HomeController {
 
   // fetch health data from the last 24 hours
   List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-     now.subtract(Duration(days: 1)), now, types);
+     now.subtract(const Duration(days: 1)), now, types);
 
   // request permissions to write steps and blood glucose
   types = [HealthDataType.STEPS, HealthDataType.BLOOD_GLUCOSE];
