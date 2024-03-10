@@ -10,23 +10,21 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final controller = HomeController();
+
+  @override
   
   @override
-  void initState() {
-    super.initState();
-    controller.getData();
-  }
-
-
-  @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Page'),
-      ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Home Page')),
+      floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            controller.getData();
+          },
+          child:const Icon(Icons.refresh),),
       body: const Center(
-        child:  Text('Home Page'),
+        child: Text('Home Page'),
       ),
     );
-}
+  }
 }

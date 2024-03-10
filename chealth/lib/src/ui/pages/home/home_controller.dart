@@ -19,7 +19,7 @@ class HomeController {
 
   // fetch health data from the last 24 hours
   List<HealthDataPoint> healthData = await health.getHealthDataFromTypes(
-     now.subtract(const Duration(days: 1)), now, types);
+     now.subtract(const Duration(days: 3)), now, types);
 
   // request permissions to write steps and blood glucose
   types = [HealthDataType.STEPS, HealthDataType.BLOOD_GLUCOSE];
@@ -27,16 +27,15 @@ class HomeController {
       HealthDataAccess.READ_WRITE,
       HealthDataAccess.READ_WRITE
   ];
-  await health.requestAuthorization(types, permissions: permissions);
+ // await health.requestAuthorization(types, permissions: permissions);
 
   // write steps and blood glucose
-  bool success = await health.writeHealthData(10, HealthDataType.STEPS, now, now);
-  success = await health.writeHealthData(3.1, HealthDataType.BLOOD_GLUCOSE, now, now);
+  //bool success = await health.writeHealthData(10, HealthDataType.STEPS, now, now);
+  //success = await health.writeHealthData(3.1, HealthDataType.BLOOD_GLUCOSE, now, now);
 
   // get the number of steps for today
   var midnight = DateTime(now.year, now.month, now.day);
-  int? steps = await health.getTotalStepsInInterval(midnight, now);
-
+  print(healthData);
 
   }
 
