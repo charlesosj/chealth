@@ -33,17 +33,40 @@ class _HomePageState extends State<HomePage> {
           },
           child: const Icon(Icons.refresh),
         ),
-        body: ListView.builder(
-        itemCount: healthDataList.length,
-        itemBuilder: (_, index) {
-          HealthDataPoint p = healthDataList[index];
-
-          return ListTile(
-            title: Text("${p.typeString}: ${p.value}"),
-            trailing: Text(p.unitString),
-            subtitle: Text('${p.dateFrom} - ${p.dateTo}'),
-          );
-        })
+        body: SizedBox(
+          height: double.infinity,
+          width: double.infinity,
+          child: Column(  
+          
+            children: [ Row( children: [ 
+              ElevatedButton(onPressed: () async {
+            state = await   repository.fetchData();
+          
+              setState(() {
+                healthDataList = repository.healthDataList;
+                
+              });
+            }, child: Text('Getdata'))
+          
+          
+            ],),
+             ListView.builder(
+              shrinkWrap: true,
+          itemCount: healthDataList.length,
+          itemBuilder: (_, index) {
+            HealthDataPoint p = healthDataList[index];
+          
+            return ListTile(
+              title: Text("${p.typeString}: ${p.value}"),
+              trailing: Text(p.unitString),
+              subtitle: Text('${p.dateFrom} - ${p.dateTo}'),
+            );
+          })
+           ]
+          
+          
+          ),
+        )
      
        
 
