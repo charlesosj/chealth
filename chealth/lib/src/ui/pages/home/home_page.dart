@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:chealth/src/infra/health_repository.dart';
 import 'package:chealth/src/ui/pages/home/home_controller.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chealth/src/ui/widgets/contentDataReady.dart';
 import 'package:chealth/src/infra/health_repository.dart';
@@ -15,20 +16,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  AppState state = AppState.DATA_NOT_FETCHED;
-  HealthRepository repository = HealthRepository();
-  List<HealthDataPoint> healthDataList = [];
+  HomeController controller = HomeController();
+  DateTime lastPull = DateTime(1999, 1, 1);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: Text('Home Page $state')),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            state = await repository.fetchData();
+    controller.initialize();
 
-            setState(() {
-              healthDataList = repository.healthDataList;
+    return Scaffold(
+        appBar: AppBar(title: const Text('Home Page')),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            setState(() async {
+              await controller.fetchData(lastPull);
             });
           },
           child: const Icon(Icons.refresh),
@@ -41,37 +41,53 @@ class _HomePageState extends State<HomePage> {
               children: [
                 ElevatedButton(
                     onPressed: () async {
-                      state = await repository.fetchData();
+                      await controller.fetchData(lastPull);
+
+                      setState(() {});
+                    },
+                    child: const Text('Getdata')),
+                ElevatedButton(
+                    onPressed: () async {
+                      await controller.addData();
+                      await controller.fetchData(lastPull);
 
                       setState(() {
-                        healthDataList = repository.healthDataList;
+                        lastPull = controller.returnCurrentLastPUll();
                       });
                     },
-                    child: Text('Getdata')),
-                    ElevatedButton(
+                    child: const Text('Add data')),
+                ElevatedButton(
                     onPressed: () async {
-                      await repository.addData();
-
+                      await controller.insertData();
                       setState(() {
-                        healthDataList = repository.healthDataList;
+                        lastPull = controller.returnCurrentLastPUll();
                       });
                     },
-                    child: Text('Add data')),
-                     ElevatedButton(
-                    onPressed: () async {
-                      await repository.insertData();
-
-                
-                    },
-                    child: Text('Insert data'))
-
+                    child: const Text('Insert data'))
               ],
+            ),
+                   SizedBox(
+              height: 200,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: controller.returnCurrentLastPUll(),
+                
+                onDateTimeChanged: (DateTime newDateTime) {
+                  controller.overideLastPull(newDateTime);
+
+                  setState(() {
+                    lastPull = newDateTime;
+                  });
+
+                  // Do something
+                },
+              ),
             ),
             ListView.builder(
                 shrinkWrap: true,
-                itemCount: healthDataList.length,
+                itemCount: controller.healthDataList.length,
                 itemBuilder: (_, index) {
-                  HealthDataPoint p = healthDataList[index];
+                  HealthDataPoint p = controller.healthDataList[index];
 
                   return ListTile(
                     title: Text("${p.typeString}: ${p.value}"),

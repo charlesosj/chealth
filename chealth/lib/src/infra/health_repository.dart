@@ -10,7 +10,7 @@ class HealthRepository {
   HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
   List<HealthDataPoint> healthDataList = [];
   bool authorized = false;
-  final My_DB myDB = My_DB() ; 
+
   final types = dataTypesAndroid;
 
   //default constructor
@@ -45,14 +45,14 @@ class HealthRepository {
     print('authorized: $authorized');
   }
 
-  Future fetchData({int days = 24}) async {
+  Future fetchData(DateTime inputDate) async {
     if (!authorized) {
       authorize();
     }
 
     // get data within the last 24 hours
     final now = DateTime.now();
-    final fetchDate = now.subtract(Duration(days: days));
+  
 
     // Clear old data points
     healthDataList.clear();
@@ -61,7 +61,7 @@ class HealthRepository {
       // fetch health data
       _state = AppState.FETCHING_DATA;
       List<HealthDataPoint> healthData =
-          await health.getHealthDataFromTypes(fetchDate, now, types);
+          await health.getHealthDataFromTypes(inputDate, now, types);
       // save all the new data points (only the first 100)
       healthDataList.addAll(
           (healthData.length < 100) ? healthData : healthData.sublist(0, 100));
@@ -73,7 +73,7 @@ class HealthRepository {
     healthDataList = HealthFactory.removeDuplicates(healthDataList);
     _state = AppState.DATA_READY;
 
-    return _state;
+    return healthDataList;
   }
 
   Future revokeAccess() async {
@@ -145,15 +145,7 @@ class HealthRepository {
 
   }
 
-  //code to insert healthdata into the database
-  Future<void> insertData() async {
-    if  (!myDB.isConnected) {
-      await myDB.connect();
-    }
- 
-    final data = myDB.convert(healthDataList);
-    await myDB.upsert(data);
-  }
+
 
 }
 
