@@ -1,5 +1,6 @@
 // ignore_for_file: constant_identifier_names, avoid_print
 
+import 'package:chealth/src/infra/my_db.dart';
 import 'package:chealth/src/util.dart';
 import 'package:health/health.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -9,6 +10,7 @@ class HealthRepository {
   HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
   List<HealthDataPoint> healthDataList = [];
   bool authorized = false;
+  final My_DB myDB = My_DB() ; 
   final types = dataTypesAndroid;
 
   //default constructor
@@ -141,6 +143,16 @@ class HealthRepository {
     // );
 
 
+  }
+
+  //code to insert healthdata into the database
+  Future<void> insertData() async {
+    if  (!myDB.isConnected) {
+      await myDB.connect();
+    }
+ 
+    final data = myDB.convert(healthDataList);
+    await myDB.upsert(data);
   }
 
 }

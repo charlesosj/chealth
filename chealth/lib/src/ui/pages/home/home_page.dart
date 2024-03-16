@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:chealth/src/infra/health_repository.dart';
 import 'package:chealth/src/ui/pages/home/home_controller.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +56,15 @@ class _HomePageState extends State<HomePage> {
                         healthDataList = repository.healthDataList;
                       });
                     },
-                    child: Text('Add data'))
+                    child: Text('Add data')),
+                     ElevatedButton(
+                    onPressed: () async {
+                      await repository.insertData();
+
+                
+                    },
+                    child: Text('Insert data'))
+
               ],
             ),
             ListView.builder(
