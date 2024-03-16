@@ -6,7 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 class HealthRepository {
   AppState _state = AppState.DATA_NOT_FETCHED;
-  HealthFactory health = HealthFactory();
+  HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
   List<HealthDataPoint> healthDataList = [];
   bool authorized = false;
   final types = dataTypesAndroid;
@@ -14,6 +14,7 @@ class HealthRepository {
   //default constructor
 
   Future authorize() async {
+   // final permissions = types.map((e) => HealthDataAccess.READ_WRITE).toList();
     final permissions = types.map((e) => HealthDataAccess.READ_WRITE).toList();
     health = HealthFactory(useHealthConnectIfAvailable: true);
 
@@ -80,6 +81,66 @@ class HealthRepository {
     } catch (error) {
       print("Caught exception in revokeAccess: $error");
     }
+  }
+
+    Future addData() async {
+    final now = DateTime.now();
+    final earlier = now.subtract( const Duration(minutes: 20));
+
+    // Add data for supported types
+    // NOTE: These are only the ones supported on Androids new API Health Connect.
+    // Both Android's Google Fit and iOS' HealthKit have more types that we support in the enum list [HealthDataType]
+    // Add more - like AUDIOGRAM, HEADACHE_SEVERE etc. to try them.
+    bool success = true;
+    success &= await health.writeHealthData(
+        1.925, HealthDataType.HEIGHT, earlier, now);
+    success &=
+        await health.writeHealthData(90, HealthDataType.WEIGHT, earlier, now);
+    success &= await health.writeHealthData(
+        90, HealthDataType.HEART_RATE, earlier, now);
+    success &=
+        await health.writeHealthData(90, HealthDataType.STEPS, earlier, now);
+    success &= await health.writeHealthData(
+        200, HealthDataType.ACTIVE_ENERGY_BURNED, earlier, now);
+    success &= await health.writeHealthData(
+        70, HealthDataType.HEART_RATE, earlier, now);
+    success &= await health.writeHealthData(
+        37, HealthDataType.BODY_TEMPERATURE, earlier, now);
+    success &= await health.writeBloodOxygen(98, earlier, now, flowRate: 1.0);
+    success &= await health.writeHealthData(
+        105, HealthDataType.BLOOD_GLUCOSE, earlier, now);
+    success &=
+        await health.writeHealthData(1.8, HealthDataType.WATER, earlier, now);
+    success &= await health.writeWorkoutData(
+        HealthWorkoutActivityType.AMERICAN_FOOTBALL,
+        now.subtract(Duration(minutes: 15)),
+        now,
+        totalDistance: 2430,
+        totalEnergyBurned: 400);
+    success &= await health.writeBloodPressure(90, 80, earlier, now);
+    success &= await health.writeHealthData(
+        0.0, HealthDataType.SLEEP_DEEP, earlier, now);
+    success &= await health.writeMeal(
+        earlier, now, 1000, 50, 25, 50, "Banana", MealType.SNACK);
+    // Store an Audiogram
+    // Uncomment these on iOS - only available on iOS
+    // const frequencies = [125.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0];
+    // const leftEarSensitivities = [49.0, 54.0, 89.0, 52.0, 77.0, 35.0];
+    // const rightEarSensitivities = [76.0, 66.0, 90.0, 22.0, 85.0, 44.5];
+
+    // success &= await health.writeAudiogram(
+    //   frequencies,
+    //   leftEarSensitivities,
+    //   rightEarSensitivities,
+    //   now,
+    //   now,
+    //   metadata: {
+    //     "HKExternalUUID": "uniqueID",
+    //     "HKDeviceName": "bluetooth headphone",
+    //   },
+    // );
+
+
   }
 
 }

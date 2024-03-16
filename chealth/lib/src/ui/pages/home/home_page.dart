@@ -19,16 +19,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         appBar: AppBar(title: Text('Home Page $state')),
         floatingActionButton: FloatingActionButton(
           onPressed: () async {
-          state = await   repository.fetchData();
+            state = await repository.fetchData();
 
             setState(() {
               healthDataList = repository.healthDataList;
-              
             });
           },
           child: const Icon(Icons.refresh),
@@ -36,47 +34,42 @@ class _HomePageState extends State<HomePage> {
         body: SizedBox(
           height: double.infinity,
           width: double.infinity,
-          child: Column(  
-          
-            children: [ Row( children: [ 
-              ElevatedButton(onPressed: () async {
-            state = await   repository.fetchData();
-          
-              setState(() {
-                healthDataList = repository.healthDataList;
-                
-              });
-            }, child: Text('Getdata'))
-          
-          
-            ],),
-             ListView.builder(
-              shrinkWrap: true,
-          itemCount: healthDataList.length,
-          itemBuilder: (_, index) {
-            HealthDataPoint p = healthDataList[index];
-          
-            return ListTile(
-              title: Text("${p.typeString}: ${p.value}"),
-              trailing: Text(p.unitString),
-              subtitle: Text('${p.dateFrom} - ${p.dateTo}'),
-            );
-          })
-           ]
-          
-          
-          ),
-        )
-     
-       
+          child: Column(children: [
+            Row(
+              children: [
+                ElevatedButton(
+                    onPressed: () async {
+                      state = await repository.fetchData();
 
+                      setState(() {
+                        healthDataList = repository.healthDataList;
+                      });
+                    },
+                    child: Text('Getdata')),
+                    ElevatedButton(
+                    onPressed: () async {
+                      await repository.addData();
 
+                      setState(() {
+                        healthDataList = repository.healthDataList;
+                      });
+                    },
+                    child: Text('Add data'))
+              ],
+            ),
+            ListView.builder(
+                shrinkWrap: true,
+                itemCount: healthDataList.length,
+                itemBuilder: (_, index) {
+                  HealthDataPoint p = healthDataList[index];
 
-
-
-
-
-
-    );
+                  return ListTile(
+                    title: Text("${p.typeString}: ${p.value}"),
+                    trailing: Text(p.unitString),
+                    subtitle: Text('${p.dateFrom} - ${p.dateTo}'),
+                  );
+                })
+          ]),
+        ));
   }
 }
