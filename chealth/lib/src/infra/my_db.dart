@@ -15,7 +15,8 @@ class My_DB {
 //
  late MySqlConnection conn;
 var isConnected = false;
-DateTime lastPull = DateTime( 2021,  1,  1);
+//set  last pull to yesterday
+DateTime lastPull =  DateTime.now().subtract( const Duration(days: 1));
 
 
 Future<void> connect() async{
@@ -38,7 +39,7 @@ Future<void> connect() async{
 List<Map<String, Object>> convert(List<HealthDataPoint> healthDataList) {
   //nvanterTipiClass.fromJson(json.decode(response.body));
   
-  return healthDataList.map((e) => {'hash': e.hashCode, 'data': json.encode(e ) ,'device_id':e.deviceId ,'data_type':e.typeString,'unit':e.unitString }).toList();
+  return healthDataList.map((e) => {'hash': e.hashCode, 'data': json.encode(e ) ,'device_id':e.deviceId ,'data_type':e.typeString,'unit':e.unitString,'date_to':e.dateTo.toUtc(),'date_from':e.dateFrom.toUtc(), 'source_name': e.sourceName , 'value': json.encode(e.value) }).toList();
 }
 
 
@@ -46,10 +47,10 @@ List<Map<String, Object>> convert(List<HealthDataPoint> healthDataList) {
 // upsert multiple records from a list into dbo_incoming with fields hash and data, if hash exists update the record hash is the primary key
 Future<void> upsert(List<Map<String, dynamic>> data) async
 {
-  var sql = 'INSERT INTO dbo_incoming (hash, data,device_id,data_type,unit) VALUES (?, ?,?,?,?) ON DUPLICATE KEY UPDATE data = ?';
+  var sql = 'INSERT INTO dbo_incoming (hash, data,device_id,data_type,unit,date_to,date_from,source_name,value) VALUES (?, ?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE data = ?';
 
   try {
-    await conn.queryMulti(sql, data.map((e) => [e['hash'], e['data'],e['device_id'],e['data_type'],e['unit'], e['data']]).toList());
+    await conn.queryMulti(sql, data.map((e) => [e['hash'], e['data'],e['device_id'],e['data_type'],e['unit'],e['date_to'],e['date_from'],e['source_name'],e['value'], e['data']]).toList());
   } catch (e) {
     print('Error: $e');
   }

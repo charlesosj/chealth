@@ -45,14 +45,13 @@ class HealthRepository {
     print('authorized: $authorized');
   }
 
-  Future fetchData(DateTime inputDate) async {
+  Future fetchData(DateTime from , DateTime to ) async {
     if (!authorized) {
       authorize();
     }
 
     // get data within the last 24 hours
-    final now = DateTime.now();
-  
+
 
     // Clear old data points
     healthDataList.clear();
@@ -61,10 +60,10 @@ class HealthRepository {
       // fetch health data
       _state = AppState.FETCHING_DATA;
       List<HealthDataPoint> healthData =
-          await health.getHealthDataFromTypes(inputDate, now, types);
+          await health.getHealthDataFromTypes(from, to, types);
       // save all the new data points (only the first 100)
-      healthDataList.addAll(
-          (healthData.length < 100) ? healthData : healthData.sublist(0, 100));
+      //healthDataList.addAll((healthData.length < 100) ? healthData : healthData.sublist(0, 100));
+      healthDataList.addAll(healthData);
     } catch (error) {
       print("Exception in getHealthDataFromTypes: $error");
     }

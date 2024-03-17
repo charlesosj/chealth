@@ -34,9 +34,13 @@ class HomeController {
   }
 
   Future fetchData( DateTime inputDate) async {
-    await repository.fetchData( overideLastPullDateTrigger? inputDate:returnCurrentLastPUll());
+    final now = DateTime.now();
+  
+    await repository.fetchData( overideLastPullDateTrigger? inputDate:returnCurrentLastPUll(),now);
     healthDataList = repository.healthDataList;
     overideLastPullDateTrigger = false;
+
+    print ('fetchData: ${healthDataList.length}');
   }
 
   // add data
@@ -56,9 +60,24 @@ class HomeController {
   }
 
   // overide last pull date
-  void overideLastPull( DateTime _dt)  {
-     myDB.lastPull = _dt; 
+  void overideLastPull( DateTime dt)  {
+     myDB.lastPull = dt; 
      overideLastPullDateTrigger = true;
+  }
+
+  //fetch and upsert data 30 days at a time working backwards 50 times
+  Future<void> fetchAndUpsertData() async {
+    final now = DateTime.now();
+    for (var i = 0; i < 50; i++) {
+      final from = now.subtract(Duration(days: 30 * (i + 1)));
+      final to = now.subtract(Duration(days: 30 * i));
+
+      print('fetchAndUpsertData: $i of 50  from $from to $to');
+      await repository.fetchData(from, to);
+      healthDataList = repository.healthDataList;
+      await insertData();
+      print( 'fetchAndUpsertData: $i of 50  found ${healthDataList.length}');
+    }
   }
   
 

@@ -1,12 +1,10 @@
-import 'dart:math';
 
-import 'package:chealth/src/infra/health_repository.dart';
+
 import 'package:chealth/src/ui/pages/home/home_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:chealth/src/ui/widgets/contentDataReady.dart';
-import 'package:chealth/src/infra/health_repository.dart';
 import 'package:health/health.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,9 +13,12 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+var loading = false;
+int recordCount = 0;
+DateTime lastPull = DateTime(1999, 1, 1);
+
 class _HomePageState extends State<HomePage> {
   HomeController controller = HomeController();
-  DateTime lastPull = DateTime(1999, 1, 1);
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +30,7 @@ class _HomePageState extends State<HomePage> {
           onPressed: () {
             setState(() async {
               await controller.fetchData(lastPull);
+              lastPull =  await controller.returnCurrentLastPUll();
             });
           },
           child: const Icon(Icons.refresh),
@@ -37,41 +39,72 @@ class _HomePageState extends State<HomePage> {
           height: double.infinity,
           width: double.infinity,
           child: Column(children: [
-            Row(
-              children: [
-                ElevatedButton(
-                    onPressed: () async {
-                      await controller.fetchData(lastPull);
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ElevatedButton(
+                      onPressed: () async {
+                        await controller.fetchData(lastPull);
+                     
+                        setState(() {
 
-                      setState(() {});
-                    },
-                    child: const Text('Getdata')),
-                ElevatedButton(
-                    onPressed: () async {
-                      await controller.addData();
-                      await controller.fetchData(lastPull);
+                          recordCount = controller.healthDataList.length;
+                           lastPull = controller.returnCurrentLastPUll();
 
-                      setState(() {
-                        lastPull = controller.returnCurrentLastPUll();
-                      });
-                    },
-                    child: const Text('Add data')),
-                ElevatedButton(
-                    onPressed: () async {
-                      await controller.insertData();
-                      setState(() {
-                        lastPull = controller.returnCurrentLastPUll();
-                      });
-                    },
-                    child: const Text('Insert data'))
-              ],
+
+                        });
+                      },
+                      child: const Text('Getdata')),
+                  ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          loading = true;
+                        });
+
+                        await controller.addData();
+                        await controller.fetchData(lastPull);
+
+                        setState(() {
+                          lastPull = controller.returnCurrentLastPUll();
+                          loading = false;
+                          recordCount = controller.healthDataList.length;
+                        });
+                      },
+                      child: const Text('Add data')),
+                  ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          loading = true;
+                        });
+                        await controller.insertData();
+                        setState(() {
+                          lastPull = controller.returnCurrentLastPUll();
+                          loading = false;
+                        });
+                      },
+                      child: const Text('Insert data')),
+                  ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          loading = true;
+                        });
+                        await controller.fetchAndUpsertData();
+                        setState(() {
+                          loading = false;
+                        });
+                      },
+                      child: const Text('Bulk insert data'))
+                ],
+              ),
             ),
-                   SizedBox(
+            Text('Record count $recordCount', textAlign: TextAlign.left),
+            Text('Last pull $lastPull', textAlign: TextAlign.left),
+            SizedBox(
               height: 200,
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.date,
                 initialDateTime: controller.returnCurrentLastPUll(),
-                
                 onDateTimeChanged: (DateTime newDateTime) {
                   controller.overideLastPull(newDateTime);
 
@@ -83,18 +116,36 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-            ListView.builder(
-                shrinkWrap: true,
-                itemCount: controller.healthDataList.length,
-                itemBuilder: (_, index) {
-                  HealthDataPoint p = controller.healthDataList[index];
+            loading == false
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: controller.healthDataList.length > 0 ? 5 : 0,
+                    itemBuilder: (_, index) {
+                      HealthDataPoint p = controller.healthDataList[index];
 
-                  return ListTile(
-                    title: Text("${p.typeString}: ${p.value}"),
-                    trailing: Text(p.unitString),
-                    subtitle: Text('${p.dateFrom} - ${p.dateTo}'),
-                  );
-                })
+                      return ListTile(
+                        title: Text("${p.typeString}: ${p.value}"),
+                        trailing: Text(p.unitString),
+                        subtitle: Text('${p.dateFrom} - ${p.dateTo}'),
+                      );
+                    })
+                : const LoadingIndicator(
+                    indicatorType: Indicator.ballPulse,
+
+                    /// Required, The loading type of the widget
+                    colors: [Colors.white],
+
+                    /// Optional, The color collections
+                    strokeWidth: 2,
+
+                    /// Optional, The stroke of the line, only applicable to widget which contains line
+                    backgroundColor: Colors.black,
+
+                    /// Optional, Background of the widget
+                    pathBackgroundColor: Colors.black
+
+                    /// Optional, the stroke backgroundColor
+                    )
           ]),
         ));
   }
