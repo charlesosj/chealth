@@ -26,13 +26,14 @@ Future<void> connect() async{
     try {
       conn = await MySqlConnection.connect(settings);
       isConnected = true;
+       getLastPull();
+    
     } catch (e) {
       print('Error: $e');
     }
 
     
-  getLastPull();
-    
+ 
 
 }
 // convert List<HealthDataPoint> to List<Map<String, dynamic>> with string being healthdata.hash and data being the entire healthdata converted to josn
@@ -47,10 +48,10 @@ List<Map<String, Object>> convert(List<HealthDataPoint> healthDataList) {
 // upsert multiple records from a list into dbo_incoming with fields hash and data, if hash exists update the record hash is the primary key
 Future<void> upsert(List<Map<String, dynamic>> data) async
 {
-  var sql = 'INSERT INTO dbo_incoming (hash, data,device_id,data_type,unit,date_to,date_from,source_name,value) VALUES (?, ?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE data = ?';
+  var sql = 'INSERT INTO dbo_incoming (hash, data,device_id,data_type,unit,date_to,date_from,source_name,value) VALUES (?, ?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE hash = hash';
 
   try {
-    await conn.queryMulti(sql, data.map((e) => [e['hash'], e['data'],e['device_id'],e['data_type'],e['unit'],e['date_to'],e['date_from'],e['source_name'],e['value'], e['data']]).toList());
+    await conn.queryMulti(sql, data.map((e) => [e['hash'], e['data'],e['device_id'],e['data_type'],e['unit'],e['date_to'],e['date_from'],e['source_name'],e['value']]).toList());
   } catch (e) {
     print('Error: $e');
   }
